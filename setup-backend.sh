@@ -2,14 +2,9 @@
 set -e
 
 
-# SETUP TERRAFORM REMOTE BACKEND
-# ALL values come from .env.backend — nothing is hardcoded in this script
-# .env.backend is gitignored and never pushed to GitHub
-
-
 # Check secrets file exists
 if [ ! -f ".env.backend" ]; then
-    echo "❌ .env.backend file not found"
+    echo " .env.backend file not found"
     echo ""
     echo "Create it by copying the example:"
     echo "  cp .env.backend.example .env.backend"
@@ -20,18 +15,16 @@ fi
 # Load all values from .env.backend
 source .env.backend
 
-# Build full bucket name from parts (never hardcoded)
+# Build full bucket name from parts
 FULL_BUCKET_NAME="${BUCKET_NAME}-${AWS_ACCOUNT_ID}"
 
-echo "========================================="
 echo " Setting up Terraform Remote Backend"
-echo "========================================="
 echo ""
 
 # Verify AWS credentials match the account in .env.backend
 echo "Checking AWS credentials..."
 if ! aws sts get-caller-identity &> /dev/null; then
-    echo "❌ AWS credentials not configured"
+    echo "AWS credentials not configured"
     echo "Run: aws configure"
     exit 1
 fi
@@ -39,15 +32,15 @@ fi
 ACTUAL_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 
 if [ "$ACTUAL_ACCOUNT" != "$AWS_ACCOUNT_ID" ]; then
-    echo "❌ Account mismatch!"
+    echo " Account mismatch!"
     echo "   .env.backend says: $AWS_ACCOUNT_ID"
     echo "   AWS CLI is using:  $ACTUAL_ACCOUNT"
     echo "   Fix your aws configure or update .env.backend"
     exit 1
 fi
 
-echo "✅ AWS Account verified: $ACTUAL_ACCOUNT"
-echo "✅ Bucket name: $FULL_BUCKET_NAME"
+echo " AWS Account verified: $ACTUAL_ACCOUNT"
+echo " Bucket name: $FULL_BUCKET_NAME"
 echo ""
 
 # Create S3 bucket
@@ -58,7 +51,7 @@ else
     aws s3api create-bucket \
         --bucket "$FULL_BUCKET_NAME" \
         --region "$AWS_REGION"
-    echo "✅ S3 bucket created"
+    echo " S3 bucket created"
 fi
 
 # Enable versioning
@@ -66,7 +59,7 @@ echo "Enabling versioning..."
 aws s3api put-bucket-versioning \
     --bucket "$FULL_BUCKET_NAME" \
     --versioning-configuration Status=Enabled
-echo "✅ Versioning enabled"
+echo " Versioning enabled"
 
 # Enable encryption
 echo "Enabling encryption..."
@@ -79,7 +72,7 @@ aws s3api put-bucket-encryption \
             }
         }]
     }'
-echo "✅ Encryption enabled"
+echo " Encryption enabled"
 
 # Block public access
 echo "Blocking public access..."
@@ -87,7 +80,7 @@ aws s3api put-public-access-block \
     --bucket "$FULL_BUCKET_NAME" \
     --public-access-block-configuration \
     BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-echo "✅ Public access blocked"
+echo " Public access blocked"
 
 # Create DynamoDB table
 echo "Creating DynamoDB table..."
@@ -107,7 +100,7 @@ else
     aws dynamodb wait table-exists \
         --table-name "$TABLE_NAME" \
         --region "$AWS_REGION"
-    echo "✅ DynamoDB table created"
+    echo "DynamoDB table created"
 fi
 
 # Generate backend.hcl files for each environment
@@ -122,7 +115,7 @@ region       = "${AWS_REGION}"
 use_lockfile = true
 encrypt      = true
 HCLEOF
-    echo "✅ environments/$ENV/backend.hcl created"
+    echo " environments/$ENV/backend.hcl created"
 done
 
 # Generate terraform.tfvars files for each environment
@@ -135,7 +128,7 @@ aws_region         = "${AWS_REGION}"
 vpc_cidr           = "${DEV_VPC_CIDR}"
 availability_zones = ["${AZ_1}", "${AZ_2}"]
 VARSEOF
-echo "✅ environments/dev/terraform.tfvars created"
+echo " environments/dev/terraform.tfvars created"
 
 cat > environments/test/terraform.tfvars << VARSEOF
 environment        = "test"
@@ -143,7 +136,7 @@ aws_region         = "${AWS_REGION}"
 vpc_cidr           = "${TEST_VPC_CIDR}"
 availability_zones = ["${AZ_1}", "${AZ_2}"]
 VARSEOF
-echo "✅ environments/test/terraform.tfvars created"
+echo " environments/test/terraform.tfvars created"
 
 cat > environments/prod/terraform.tfvars << VARSEOF
 environment        = "prod"
@@ -151,7 +144,7 @@ aws_region         = "${AWS_REGION}"
 vpc_cidr           = "${PROD_VPC_CIDR}"
 availability_zones = ["${AZ_1}", "${AZ_2}"]
 VARSEOF
-echo "✅ environments/prod/terraform.tfvars created"
+echo " environments/prod/terraform.tfvars created"
 
 # Safety check — confirm nothing sensitive is tracked by git
 echo ""
@@ -169,23 +162,22 @@ SENSITIVE_FILES=(
 
 for FILE in "${SENSITIVE_FILES[@]}"; do
     if git check-ignore -q "$FILE" 2>/dev/null; then
-        echo "✅ $FILE is gitignored"
+        echo "$FILE is gitignored"
     else
-        echo "❌ WARNING: $FILE is NOT gitignored"
+        echo " WARNING: $FILE is NOT gitignored"
         SAFE=false
     fi
 done
 
 if [ "$SAFE" = false ]; then
     echo ""
-    echo "❌ Fix your .gitignore before pushing to GitHub"
+    echo " Fix your .gitignore before pushing to GitHub"
     exit 1
 fi
 
 echo ""
-echo "========================================="
-echo "✅ Backend infrastructure ready!"
-echo "========================================="
+echo  Backend infrastructure ready!"
+
 echo ""
 echo "Deploy dev:   terraform init -reconfigure -backend-config=environments/dev/backend.hcl"
 echo "Deploy test:  terraform init -reconfigure -backend-config=environments/test/backend.hcl"
