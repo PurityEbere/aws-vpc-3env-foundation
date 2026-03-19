@@ -1,6 +1,6 @@
-# ==============================================================================
+
 # Environment Variable
-# ==============================================================================
+
 variable "environment" {
   description = "Environment name (prod, test, dev)"
   type        = string
@@ -12,9 +12,9 @@ variable "environment" {
   }
 }
 
-# ==============================================================================
+
 # CIDR Block Variable
-# ==============================================================================
+
 variable "cidr_block" {
   description = "VPC CIDR block - must not overlap with other VPCs"
   type        = string
@@ -26,9 +26,9 @@ variable "cidr_block" {
   }
 }
 
-# ==============================================================================
+
 # Tags Variable
-# ==============================================================================
+
 variable "tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)

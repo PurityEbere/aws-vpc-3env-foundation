@@ -1,14 +1,14 @@
-# ==============================================================================
+
 # DATA SOURCES
-# ==============================================================================
+
 # Get list of available Availability Zones in current region
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
-# ==============================================================================
+
 # LOCAL VALUES
-# ==============================================================================
+
 locals {
   # Use first 2 AZs (e.g., us-east-1a, us-east-1b)
   azs = slice(data.aws_availability_zones.available.names, 0, 2)
@@ -18,9 +18,9 @@ locals {
   subnet_newbits = 4
 }
 
-# ==============================================================================
+
 # PUBLIC SUBNETS
-# ==============================================================================
+
 # Internet-facing subnets for ALB, Bastion, NAT Gateway
 resource "aws_subnet" "public" {
   count = length(local.azs)
@@ -40,9 +40,9 @@ resource "aws_subnet" "public" {
   )
 }
 
-# ==============================================================================
+
 # PRIVATE APP SUBNETS
-# ==============================================================================
+
 # Application layer subnets for ECS, Lambda, EC2
 resource "aws_subnet" "private_app" {
   count = length(local.azs)
@@ -63,9 +63,9 @@ resource "aws_subnet" "private_app" {
   )
 }
 
-# ==============================================================================
+
 # PRIVATE DB SUBNETS
-# ==============================================================================
+
 # Database layer subnets for RDS, ElastiCache, Redshift
 resource "aws_subnet" "private_db" {
   count = length(local.azs)
@@ -84,9 +84,9 @@ resource "aws_subnet" "private_db" {
   )
 }
 
-# ==============================================================================
+
 # ELASTIC IPs FOR NAT GATEWAYS
-# ==============================================================================
+
 # Static public IPs for NAT Gateways
 resource "aws_eip" "nat" {
   count  = length(local.azs)
@@ -103,9 +103,9 @@ resource "aws_eip" "nat" {
   depends_on = [var.internet_gateway_id]
 }
 
-# ==============================================================================
+
 # NAT GATEWAYS
-# ==============================================================================
+
 # Provides internet access for private subnets (outbound only)
 resource "aws_nat_gateway" "main" {
   count = length(local.azs)
@@ -123,9 +123,9 @@ resource "aws_nat_gateway" "main" {
   depends_on = [var.internet_gateway_id]
 }
 
-# ==============================================================================
+
 # NETWORK ACLs FOR DB SUBNETS
-# ==============================================================================
+
 # Stateless firewall protecting database layer
 resource "aws_network_acl" "db" {
   vpc_id     = var.vpc_id
