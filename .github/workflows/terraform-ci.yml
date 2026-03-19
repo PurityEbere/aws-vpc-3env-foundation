@@ -6,6 +6,9 @@ on:
   push:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate:
     name: Terraform Validate
@@ -13,14 +16,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v3.1.2
         with:
           terraform_version: 1.6.0
 
-      - name: Terraform Init (dev)
+      - name: Terraform Init
         run: terraform init -backend=false
 
       - name: Terraform Validate
@@ -37,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
