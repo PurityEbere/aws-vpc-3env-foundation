@@ -50,6 +50,4 @@ jobs:
           soft_fail: true
           output_format: cli
           download_external_modules: false
-          skip_check: >-
-            CKV_AWS_144,
-            CKV2_AWS_62
+          skip_check: "CKV_AWS_144,CKV2_AWS_62"
