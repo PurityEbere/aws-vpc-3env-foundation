@@ -58,9 +58,9 @@ module "subnets" {
   source = "./modules/subnets"
 
   environment         = var.environment
-  vpc_id              = module.vpc.vpc_id              # ← From VPC module
-  vpc_cidr            = module.vpc.vpc_cidr            # ← From VPC module
-  internet_gateway_id = module.vpc.internet_gateway_id # ← From VPC module
+  vpc_id              = module.vpc.vpc_id              
+  vpc_cidr            = module.vpc.vpc_cidr            
+  internet_gateway_id = module.vpc.internet_gateway_id 
   tags                = local.common_tags
 }
 
@@ -73,11 +73,11 @@ module "routing" {
   environment            = var.environment
   vpc_id                 = module.vpc.vpc_id
   internet_gateway_id    = module.vpc.internet_gateway_id
-  public_subnet_ids      = module.subnets.public_subnet_ids      # ← From Subnets module
-  private_app_subnet_ids = module.subnets.private_app_subnet_ids # ← From Subnets module
-  private_db_subnet_ids  = module.subnets.private_db_subnet_ids  # ← From Subnets module
-  nat_gateway_ids        = module.subnets.nat_gateway_ids        # ← From Subnets module
-  availability_zones     = module.subnets.availability_zones     # ← From Subnets module
+  public_subnet_ids      = module.subnets.public_subnet_ids      
+  private_app_subnet_ids = module.subnets.private_app_subnet_ids 
+  private_db_subnet_ids  = module.subnets.private_db_subnet_ids  
+  nat_gateway_ids        = module.subnets.nat_gateway_ids        
+  availability_zones     = module.subnets.availability_zones     
   tags                   = local.common_tags
 }
 
@@ -90,9 +90,9 @@ module "endpoints" {
   environment                 = var.environment
   vpc_id                      = module.vpc.vpc_id
   vpc_cidr                    = module.vpc.vpc_cidr
-  public_route_table_ids      = [module.routing.public_route_table_id]     # ← From Routing module
-  private_app_route_table_ids = module.routing.private_app_route_table_ids # ← From Routing module
-  private_db_route_table_ids  = module.routing.private_db_route_table_ids  # ← From Routing module
+  public_route_table_ids      = [module.routing.public_route_table_id]     
+  private_app_route_table_ids = module.routing.private_app_route_table_ids 
+  private_db_route_table_ids  = module.routing.private_db_route_table_ids  
   private_app_subnet_ids      = module.subnets.private_app_subnet_ids
   tags                        = local.common_tags
 }

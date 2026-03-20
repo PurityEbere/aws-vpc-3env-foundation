@@ -87,7 +87,7 @@ echo "Creating DynamoDB table..."
 if aws dynamodb describe-table \
     --table-name "$TABLE_NAME" \
     --region "$AWS_REGION" &>/dev/null; then
-    echo "⚠️  Table already exists, skipping"
+    echo " Table already exists, skipping"
 else
     aws dynamodb create-table \
         --table-name "$TABLE_NAME" \
@@ -103,7 +103,7 @@ else
     echo "DynamoDB table created"
 fi
 
-# Generate backend.hcl files for each environment
+# generate backend.hcl files for each environment
 echo ""
 echo "Generating backend config files..."
 for ENV in dev test prod; do
@@ -146,7 +146,7 @@ availability_zones = ["${AZ_1}", "${AZ_2}"]
 VARSEOF
 echo " environments/prod/terraform.tfvars created"
 
-# Safety check — confirm nothing sensitive is tracked by git
+# confirm nothing sensitive is tracked by git
 echo ""
 echo "Running safety check..."
 SAFE=true
