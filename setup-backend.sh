@@ -46,7 +46,7 @@ echo ""
 # Create S3 bucket
 echo "Creating S3 bucket..."
 if aws s3api head-bucket --bucket "$FULL_BUCKET_NAME" 2>/dev/null; then
-    echo "⚠️  Bucket already exists, skipping"
+    echo " Bucket already exists, skipping"
 else
     aws s3api create-bucket \
         --bucket "$FULL_BUCKET_NAME" \
